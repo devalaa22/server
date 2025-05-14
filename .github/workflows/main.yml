@@ -1,0 +1,49 @@
+name: Ubuntu Desktop - Chrome RDP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9999
+
+    steps:
+      - name: Install XFCE Desktop & Chrome Remote Desktop
+        run: |
+          sudo apt update
+          sudo apt install -y xfce4 xfce4-goodies
+          sudo apt install -y wget curl unzip nano
+
+          # تثبيت Google Chrome Remote Desktop
+          wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+          sudo dpkg -i chrome-remote-desktop_current_amd64.deb || sudo apt -f install -y
+          sudo apt install -f -y
+
+          # إنشاء مستخدم جديد (اختياري)
+          sudo useradd -m githubuser
+          echo 'githubuser:123456' | sudo chpasswd
+          sudo usermod -aG sudo githubuser
+
+          # إعداد Chrome Remote Desktop
+          sudo bash -c 'echo "exec /usr/sbin/lightdm-session startxfce4" > /etc/chrome-remote-desktop-session'
+          sudo systemctl disable lightdm.service
+
+          # إعداد صلاحيات
+          sudo usermod -a -G chrome-remote-desktop githubuser
+
+          echo "✅ كل شيء تم تثبيته، الآن تحتاج مفتاح Chrome Remote Desktop"
+
+      - name: تعليمات Chrome Remote Desktop
+        run: |
+          echo "📌 افتح هذا الرابط وسجل دخولك:"
+          echo "https://remotedesktop.google.com/headless"
+          echo ""
+          echo "↪️ اختَر 'Debian Linux' وانسخ الأمر الذي يظهر لك"
+          echo "📋 ثم عدّل هذا الملف وضعه بدل <PASTE_COMMAND_HERE> في السطر التالي"
+
+      - name: ضع كود Google Remote Desktop هنا
+        run: |
+          # ⚠️ الصق أمر التسجيل هنا من موقع Google Remote Desktop
+          echo "❌ لم يتم وضع أمر التسجيل بعد"
+          echo "📌 افتح https://remotedesktop.google.com/headless وسجّل دخولك وانسخ الأمر"
