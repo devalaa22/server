@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Install XFCE Desktop & Chrome Remote Desktop
         run: |
+          # تحديث الحزم وتثبيت المتطلبات الأساسية
           sudo apt update
           sudo apt install -y xfce4 xfce4-goodies
           sudo apt install -y wget curl unzip nano
@@ -20,30 +21,37 @@ jobs:
           sudo dpkg -i chrome-remote-desktop_current_amd64.deb || sudo apt -f install -y
           sudo apt install -f -y
 
+          # إضافة مجموعة chrome-remote-desktop إذا لم تكن موجودة
+          if ! getent group chrome-remote-desktop > /dev/null 2>&1; then
+            sudo groupadd chrome-remote-desktop
+          fi
+
           # إنشاء مستخدم جديد (اختياري)
           sudo useradd -m githubuser
           echo 'githubuser:123456' | sudo chpasswd
           sudo usermod -aG sudo githubuser
 
-          # إعداد Chrome Remote Desktop
+          # إعداد Chrome Remote Desktop لتشغيل XFCE
           sudo bash -c 'echo "exec /usr/sbin/lightdm-session startxfce4" > /etc/chrome-remote-desktop-session'
+
+          # تعطيل خدمة LightDM
           sudo systemctl disable lightdm.service
 
-          # إعداد صلاحيات
+          # إضافة المستخدم إلى مجموعة chrome-remote-desktop
           sudo usermod -a -G chrome-remote-desktop githubuser
 
-          echo "✅ كل شيء تم تثبيته، الآن تحتاج مفتاح Chrome Remote Desktop"
+          # إعادة تشغيل خدمة Chrome Remote Desktop
+          sudo systemctl restart chrome-remote-desktop
 
-      - name: تعليمات Chrome Remote Desktop
-        run: |
-          echo "📌 افتح هذا الرابط وسجل دخولك:"
-          echo "https://remotedesktop.google.com/headless"
-          echo ""
+          # إشعار بتثبيت كل شيء بنجاح
+          echo "✅ تم تثبيت كل شيء بنجاح، الآن تحتاج إلى التوجه إلى:"
+          echo "📌 افتح هذا الرابط وسجل دخولك: https://remotedesktop.google.com/headless"
           echo "↪️ اختَر 'Debian Linux' وانسخ الأمر الذي يظهر لك"
-          echo "📋 ثم عدّل هذا الملف وضعه بدل <PASTE_COMMAND_HERE> في السطر التالي"
+          echo "📋 الصق الأمر الذي حصلت عليه في السطر التالي بعد <PASTE_COMMAND_HERE>"
 
       - name: ضع كود Google Remote Desktop هنا
         run: |
           # ⚠️ الصق أمر التسجيل هنا من موقع Google Remote Desktop
           echo "❌ لم يتم وضع أمر التسجيل بعد"
           echo "📌 افتح https://remotedesktop.google.com/headless وسجّل دخولك وانسخ الأمر"
+
